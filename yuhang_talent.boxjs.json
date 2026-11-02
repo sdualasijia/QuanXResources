@@ -1,0 +1,28 @@
+{
+  "id": "sdualasijia.yuhang.talent.qx",
+  "name": "余杭人才码签到（Quantumult X）",
+  "author": "sdualasijia",
+  "repo": "https://github.com/sdualasijia/QuanXResources",
+  "apps": [
+    {
+      "id": "yuhang_talent_sign_qx",
+      "name": "余杭人才码签到",
+      "author": "sdualasijia",
+      "repo": "https://github.com/sdualasijia/QuanXResources/blob/main/yuhang_talent_sign_qx.js",
+      "keys": [
+        "yuhang_talent_old_tokens"
+      ],
+      "settings": [
+        {
+          "id": "yuhang_talent_old_tokens",
+          "name": "oldTokens（多账户）",
+          "val": "",
+          "type": "string",
+          "placeholder": "token1@token2",
+          "desc": "多个 token 使用 @ 分隔，顺序需与脚本中的 names 一致；QX 定时任务为 1 0 * * * yuhang_talent_sign_qx.js"
+        }
+      ],
+      "script": "https://raw.githubusercontent.com/sdualasijia/QuanXResources/main/yuhang_talent_sign_qx.js"
+    }
+  ]
+}
