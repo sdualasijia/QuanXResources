@@ -10,37 +10,36 @@ const TEMP_NODE   = "direct";        // 2. 临时中转节点名称（填 "direc
 const TARGET_NODE = "🇭🇰 Hong Kong 02";        // 3. 你的主力节点名称（刷新后最终切回的节点）
 // ==============================================================
 
-// 1. 先返回 200 OK 给快捷指令，彻底消除弹窗
-$done({
-  status: "HTTP/1.1 200 OK",
-  headers: { "Connection": "Close" },
-  body: "good"
-});
+console.log(`[INFO] 开始重置策略组: ${POLICY_NAME}`);
 
-// 2. 延迟 200 毫秒执行策略组节点切换，仅打断该策略组的旧连接
-setTimeout(() => {
-  $configuration
-    .sendMessage({
+$configuration
+  .sendMessage({
+    action: "set_policy_state",
+    content: { [POLICY_NAME]: TEMP_NODE }
+  })
+  .then(() => {
+    console.log(`[INFO] 临时切换至: ${TEMP_NODE}`);
+    return new Promise((resolve) => setTimeout(resolve, 150));
+  })
+  .then(() => {
+    return $configuration.sendMessage({
       action: "set_policy_state",
-      content: { [POLICY_NAME]: TEMP_NODE }
-    })
-    .then(() => {
-      console.log(`[INFO] 策略组 [${POLICY_NAME}] 临时切换至: ${TEMP_NODE}`);
-      // 短暂延迟 100 毫秒确保旧连接断开，再切回主力节点
-      return new Promise((resolve) => setTimeout(resolve, 100));
-    })
-    .then(() => {
-      return $configuration.sendMessage({
-        action: "set_policy_state",
-        content: { [POLICY_NAME]: TARGET_NODE }
-      });
-    })
-    .then(() => {
-      console.log(`[INFO] 策略组 [${POLICY_NAME}] 已恢复至: ${TARGET_NODE}`);
-      $notify("TG 网络重置", "局部连接已刷新", `✅ 已重连至节点：${TARGET_NODE}`);
-    })
-    .catch((err) => {
-      console.log(`[ERROR] 切换失败: ${JSON.stringify(err)}`);
-      $notify("TG 网络重置失败", "请检查策略组或节点名称", "名称必须与配置文件完全一致");
+      content: { [POLICY_NAME]: TARGET_NODE }
     });
-}, 200);
+  })
+  .then(() => {
+    console.log(`[INFO] 已恢复至: ${TARGET_NODE}`);
+    $notify("TG 网络重置", "局部连接已刷新", `✅ 已重连至：${TARGET_NODE}`);
+  })
+  .catch((err) => {
+    console.log(`[ERROR] 切换失败: ${JSON.stringify(err)}`);
+    $notify("TG 网络重置失败", "请检查策略组或节点名称", JSON.stringify(err));
+  })
+  .finally(() => {
+    // 所有切换动作完成后，再返回 200 响应并结束脚本
+    $done({
+      status: "HTTP/1.1 200 OK",
+      headers: { "Connection": "Close" },
+      body: "good"
+    });
+  });
